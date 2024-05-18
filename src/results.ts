@@ -269,7 +269,7 @@ function prepareData(sessionType: SessionType) {
 }
 
 async function convert(sessionData: any, language: string, sessionType: SessionType) {
-    const browser = await puppeteer.launch({ headless: "new" })
+    const browser = await puppeteer.launch({ headless: true })
     const page = await browser.newPage()
 
     let templateFolder = "templates"

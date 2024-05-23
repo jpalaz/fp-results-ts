@@ -171,7 +171,7 @@ function translateLappedText(gap: string) {
     return gap
 }
 
-function mapSourceDataToDriver(sessionType, it, i) {
+function mapSourceDataToDriver(sessionType: SessionType, it: any, i: number) {
     const knownDriver = DRIVER_NAMES[it[0]]
     const driver = knownDriver != null ? knownDriver : DRIVER_NAMES["??"]
     const driverData = {

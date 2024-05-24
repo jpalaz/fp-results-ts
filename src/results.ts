@@ -255,10 +255,6 @@ const updateState = (data) => {
 
             state = deepObjectMerge(state, parsed.R);
         }
-
-        if (state['TimingAppData']) {
-            console.log("Updated TimingAppData: " + state['TimingAppData'])
-        }
 //        console.log("Updated F1 state")
         //        console.log(state)
     } catch (e) {
@@ -383,9 +379,13 @@ async function notifyAdmin(message: string) {
     await bot.telegram.sendMessage(ADMIN_ID, message)
 }
 
+function extractUserId(ctx: Context<any>) {
+    return ctx.update?.message?.from.id + "";
+}
+
 async function createAndSendScreenshots(ctx: Context<any>, sessionType: SessionType) {
     try {
-        const userId = ctx.update?.message?.from.id + ""
+        const userId = extractUserId(ctx)
         const message = "Карыстальнік " + userId + " запытаў вынікі для " + sessionType.id
         console.log(message)
         if (userId !== ADMIN_ID) {
@@ -454,6 +454,18 @@ bot.command('sq2', async (ctx) => {
 
 bot.command('sq3', async (ctx) => {
     await createAndSendScreenshots(ctx, sessionTypes.sq3)
+})
+
+bot.command('debugTad', async (ctx) => {
+    if (extractUserId(ctx) === ADMIN_ID) {
+        ctx.reply("Цяперашняе значэнне TimingAppData:\n\n" + JSON.stringify(state['TimingAppData']))
+    }
+})
+
+bot.command('debug', async (ctx) => {
+    if (extractUserId(ctx) === ADMIN_ID) {
+        ctx.reply("Цяперашняе значэнне аб'екту state:\n\n" + JSON.stringify(state))
+    }
 })
 
 bot.command('reconnect', async (ctx) => {

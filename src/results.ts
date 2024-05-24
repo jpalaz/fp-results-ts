@@ -4,7 +4,7 @@ import bodyParser from 'body-parser'
 import ejs from "ejs"
 import ws from "ws"
 import zlib from "zlib"
-import {Telegraf} from 'telegraf'
+import {Context, Telegraf} from 'telegraf'
 import {sessionTypes, SessionType} from "./utils/constants"
 import {DRIVER_NAMES} from "./utils/drivers"
 import {rounds, RoundInfo2024} from "./utils/rounds2024"
@@ -383,7 +383,7 @@ async function notifyAdmin(message: string) {
     await bot.telegram.sendMessage(ADMIN_ID, message)
 }
 
-async function createAndSendScreenshots(ctx, sessionType: SessionType) {
+async function createAndSendScreenshots(ctx: Context<any>, sessionType: SessionType) {
     try {
         const userId = ctx.update?.message?.from.id + ""
         const message = "Карыстальнік " + userId + " запытаў вынікі для " + sessionType.id
@@ -432,7 +432,7 @@ bot.command('fp3', async (ctx) => {
     await createAndSendScreenshots(ctx, sessionTypes.fp3)
 })
 
-bot.command('q1', async (ctx: Context<Update>) => {
+bot.command('q1', async (ctx) => {
     await createAndSendScreenshots(ctx, sessionTypes.q1)
 })
 

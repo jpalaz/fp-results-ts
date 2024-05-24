@@ -5,65 +5,12 @@ import ejs from "ejs"
 import ws from "ws"
 import zlib from "zlib"
 import {Telegraf} from 'telegraf'
+import {sessionTypes, SessionType} from "./utils/constants"
+import {DRIVER_NAMES} from "./utils/drivers"
+import {rounds, RoundInfo2024} from "./utils/rounds2024"
+import {timeConverter} from "./utils/time"
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
-
-const RACE_POINTS = {
-    1: 25, 2: 18, 3: 15, 4: 12, 5: 10,
-    6: 8, 7: 6, 8: 4, 9: 2, 10: 1,
-}
-
-const SPRINT_POINTS = {
-    1: 8, 2: 7, 3: 6, 4: 5,
-    5: 4, 6: 3, 7: 2, 8: 1,
-    9: 0, 10: 0,
-}
-
-class SessionType {
-    nameBLR: string
-    nameUKR: string
-    template: string
-    id: string
-
-    constructor(name: string, nameUKR: string, template: string, id: string) {
-        this.nameBLR = name
-        this.nameUKR = nameUKR
-        this.template = template
-        this.id = id
-    }
-
-    get points() {
-        if (this.id === "race") {
-            return RACE_POINTS
-        } else if (this.id === "sprint") {
-            return SPRINT_POINTS
-        }
-    }
-
-    get segment() {
-        if (this.id === "Q1" || this.id === "SQ1") {
-            return 0
-        } else if (this.id === "Q2" || this.id === "SQ2") {
-            return 1
-        } else if (this.id === "Q3" || this.id === "SQ3") {
-            return 2
-        }
-    }
-}
-
-const sessionTypes = {
-    q1: new SessionType('КВАЛІФІКАЦЫЯ - 1', 'КВАЛІФІКАЦІЯ - 1', "qualification", "Q1"),
-    q2: new SessionType('КВАЛІФІКАЦЫЯ - 2', 'КВАЛІФІКАЦІЯ - 2', "qualification", "Q2"),
-    q3: new SessionType('КВАЛІФІКАЦЫЯ', 'КВАЛІФІКАЦІЯ', "qualification", "Q3"),
-    sq1: new SessionType('СПРЫНТ КВАЛІФІКАЦЫЯ - 1', 'СПРИНТ КВАЛІФІКАЦІЯ - 1', "qualification", "SQ1"),
-    sq2: new SessionType('СПРЫНТ КВАЛІФІКАЦЫЯ - 2', 'СПРИНТ КВАЛІФІКАЦІЯ - 2', "qualification", "SQ2"),
-    sq3: new SessionType('СПРЫНТ КВАЛІФІКАЦЫЯ', 'СПРИНТ КВАЛІФІКАЦІЯ', "qualification", "SQ3"),
-    race: new SessionType('ГОНКА', 'ГОНКА', "race", "race"),
-    sprint: new SessionType('СПРЫНТ', 'СПРИНТ', "race", "sprint"),
-    fp1: new SessionType('ВОЛЬНАЯ ПРАКТЫКА 1', 'ПРАКТИКА 1', "practice", "FP1"),
-    fp2: new SessionType('ВОЛЬНАЯ ПРАКТЫКА 2', 'ПРАКТИКА 2', "practice", "FP2"),
-    fp3: new SessionType('ВОЛЬНАЯ ПРАКТЫКА 3', 'ПРАКТИКА 3', "practice", "FP3"),
-};
 
 const sortPosition = (a: any, b: any) => {
     const [, aLine] = a;
@@ -72,88 +19,6 @@ const sortPosition = (a: any, b: any) => {
     const bPos = Number(bLine.Position);
     return aPos - bPos;
 };
-
-class DriverName {
-    nameBLR: string
-    nameUKR: string
-    teamId: number
-
-    constructor(nameBLR: string, nameUKR: string, teamId: number) {
-        this.nameBLR = nameBLR
-        this.nameUKR = nameUKR
-        this.teamId = teamId
-    }
-}
-
-const DRIVER_NAMES = {
-    "1": new DriverName("Макс Верстапен", "Макс Ферстаппен", 1),
-    "11": new DriverName("Серхіа Перэс", "Серхіо Перес", 1),
-    "63": new DriverName("Джордж Расэл", "Джордж Расселл", 2),
-    "44": new DriverName("Льюіс Гэмілтан", "Льюїс Хемілтон", 2),
-    "55": new DriverName("Карлас Сайнц", "Карлос Сайнс", 3),
-    "16": new DriverName("Шарль Леклер", "Шарль Леклер", 3),
-//    "38": new DriverName("Олівер Берман", "Олівер Берман", 3),
-    "4": new DriverName("Ланда Норыс", "Ландо Норріс", 4),
-    "81": new DriverName("Оскар Піястры", "Оскар Піастрі", 4),
-    "14": new DriverName("Фернанда Алонса", "Фернандо Алонсо", 5),
-    "18": new DriverName("Лэнс Строл", "Ленс Стролл", 5),
-    "10": new DriverName("П'ер Гаслі", "П'єр Гаслі", 6),
-    "31": new DriverName("Эстэбан Акон", "Естебан Окон", 6),
-    "23": new DriverName("Алекс Албан", "Алекс Албон", 7),
-    "2": new DriverName("Логан Сарджэнт", "Логан Сарджент", 7),
-    "3": new DriverName("Даніэль Рык'ярда", "Даніель Ріккардо", 8),
-    "22": new DriverName("Юкі Цунода", "Юкі Цунода", 8),
-//    "??": new DriverName("Аюму Іваса 🔁", "Аюму Іваса 🔁", 8),
-    "77": new DriverName("Вальтэры Ботас", "Вальтері Боттас", 9),
-    "24": new DriverName("Гуанью Чжоў", "Гуанью Чжоу", 9),
-    "27": new DriverName("Ніка Хюлкенберг", "Ніко Хюлькенберг", 10),
-    "20": new DriverName("Кевін Магнусэн", "Кевін Магнуссен", 10),
-    "??": new DriverName("Олівер Берман 🔁", "Олівер Берман 🔁", 10),
-}
-
-class RoundInfo2024 {
-    gpNameBLR: string
-    gpNameUKR: string
-    flag: string
-    day: number
-    month: number
-
-    constructor(gpNameBLR: string, gpNameUKR: string, flag: string, day: number, month: number) {
-        this.gpNameBLR = gpNameBLR
-        this.gpNameUKR = gpNameUKR
-        this.flag = flag
-        this.day = day
-        this.month = month
-    }
-}
-
-const rounds = [
-    new RoundInfo2024('ГП Бахрэйну', "ГП Австралії", "bh", 29, 2),
-    new RoundInfo2024('ГП Саўдаўскай Аравіі', "ГП Австралії", "sa", 7, 3),
-    new RoundInfo2024('ГП Аўстраліі', "ГП Австралії", "au", 22, 3),
-    new RoundInfo2024("ГП Японіі", "ГП Японії", "jp", 5, 4),
-    new RoundInfo2024("ГП Кітаю", "ГП Китаю", "cn", 19, 4),
-    new RoundInfo2024("ГП Маямі", "ГП Маямі", "us", 3, 5),
-    new RoundInfo2024("ГП Эміліі-Раманьі", "ГП Емілії-Романьї", "it", 17, 5),
-    new RoundInfo2024("ГП Манака", "ГП Монако", "mc", 24, 5),
-    new RoundInfo2024("ГП Канады", "ГП Канади", "ca", 7, 6),
-    new RoundInfo2024("ГП Гішпаніі", "ГП Іспанії", "es", 21, 6),
-    new RoundInfo2024("ГП Аўстрыі", "ГП Австрії", "at", 28, 6),
-//  new RoundInfo2024("ГП Вялікабрытаніі", "ГП Великої Британії", "it", 5, 7),
-    new RoundInfo2024("ГП Вялікай Брытаніі", "ГП Великої Британії", "gb", 5, 7),
-    new RoundInfo2024("ГП Вугоршчыны", "ГП Угорщини", "hu", 19, 7),
-    new RoundInfo2024("ГП Бельгіі", "ГП Бельгії", "be", 26, 7),
-    new RoundInfo2024("ГП Нідэрландаў", "ГП Нідерландів", "nl", 23, 8),
-    new RoundInfo2024("ГП Італіі", "ГП Італії", "it", 30, 8),
-    new RoundInfo2024("ГП Азербайджану", "ГП Азербайджану", "az", 13, 9),
-    new RoundInfo2024("ГП Сінгапуру", "ГП Сінгапуру", "sg", 20, 9),
-    new RoundInfo2024("ГП ЗША", "ГП США", "us", 18, 10),
-    new RoundInfo2024("ГП Мексікі", "ГП Мексики", "mx", 25, 10),
-    new RoundInfo2024("ГП Бразіліі", "ГП Бразилії", "br", 1, 11),
-    new RoundInfo2024("ГП Лас-Вегаса", "ГП Лас-Вегаса", "us", 21, 11),
-    new RoundInfo2024("ГП Катару", "ГП Катару", "qa", 29, 11),
-    new RoundInfo2024("ГП Абу-Дабі", "ГП Абу-Дабі", "ae", 6, 12),
-]
 
 function extractCurrentRound() {
     const now = new Date()
@@ -316,31 +181,10 @@ async function convert(sessionData: any, language: string, sessionType: SessionT
     }
 }
 
-function withLeadingZero(number: number) {
-    return number < 10 ? ("0" + number) : ("" + number); 
-}
-
-function timeConverter(UNIX_timestamp) {
-    const a = new Date(UNIX_timestamp);
-    const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
-    const year = a.getFullYear();
-    const month = months[a.getMonth()];
-    const date = a.getDate();
-    const hour = a.getHours();
-    const min = a.getMinutes();
-    const sec = a.getSeconds();
-    return year + '-' + month + '-' + withLeadingZero(date) + ' '
-        + withLeadingZero(hour) + '-'  + withLeadingZero(min) + '-'  + withLeadingZero(sec)
-}
-
 const app = express()
 const port = 3000
 app.use(bodyParser.json())
 app.use(express.static('public'))
-
-function sendImage(res, png) {
-    return res.contentType("image/png").send(png);
-}
 
 const signalrUrl = "livetiming.formula1.com/signalr";
 const signalrHub = "Streaming";
@@ -409,6 +253,10 @@ const updateState = (data) => {
                 parsed.R["Position"] = parseCompressed(parsed.R["Position.z"]);
 
             state = deepObjectMerge(state, parsed.R);
+        }
+
+        if (state['TimingAppData']) {
+            console.log("Updated TimingAppData: " + state['TimingAppData'])
         }
 //        console.log("Updated F1 state")
         //        console.log(state)

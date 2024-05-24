@@ -39,6 +39,30 @@ export class SessionType {
             return 2
         }
     }
+
+    get takeFrom() {
+        if (this.id === "Q1" || this.id === "SQ1") {
+            return 15
+        } else if (this.id === "Q2" || this.id === "SQ2") {
+            return 10
+        } else if (this.id === "Q3" || this.id === "SQ3") {
+            return 0
+        } else {
+            return 0
+        }
+    }
+
+    get takeTo() {
+        if (this.id === "Q1" || this.id === "SQ1") {
+            return -1
+        } else if (this.id === "Q2" || this.id === "SQ2") {
+            return 16
+        } else if (this.id === "Q3" || this.id === "SQ3") {
+            return 10
+        } else {
+            return 10
+        }
+    }
 }
 
 export const sessionTypes = {

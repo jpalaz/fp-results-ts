@@ -11,6 +11,7 @@ import {rounds, RoundInfo2024} from "./utils/rounds2024"
 import {timeConverter} from "./utils/time"
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
+const ADMIN_ID = process.env.ADMIN_ID
 
 const sortPosition = (a: any, b: any) => {
     const [, aLine] = a;
@@ -121,8 +122,8 @@ function prepareData(sessionType: SessionType) {
         }
     }
 
-    console.log("fastest lap: " + fastestLap + ", fastest: " + lines[fastestPosition].nameBLR)
-    console.log(lines)
+//    console.log("fastest lap: " + fastestLap + ", fastest: " + lines[fastestPosition].nameBLR)
+//    console.log(lines)
     const currentRound = extractCurrentRound()
     return {
         drivers: lines,
@@ -369,25 +370,40 @@ function sendImageToUser(ctx) {
     return screenshot => ctx.replyWithDocument({source: screenshot[0], filename: screenshot[1]});
 }
 
-function createDriversList(sessionData) {
-    return sessionData.drivers.map((driver, i) => {
-        return (i+1) + ". " + driver.nameBLR + "\n"
-    })
-    .reduce((a, b) => a + b)
+function createDriversList(sessionData: any, sessionType: SessionType) {
+    return sessionData.drivers
+        .slice(sessionType.takeFrom, sessionType.takeTo)
+        .map((driver, i: number) => {
+            return (i+1) + ". " + driver.nameBLR
+        })
+        .reduce((a: string, b: string) => a + "\n" + b)
+}
+
+async function notifyAdmin(message: string) {
+    await bot.telegram.sendMessage(ADMIN_ID, message)
 }
 
 async function createAndSendScreenshots(ctx, sessionType: SessionType) {
     try {
+        const userId = ctx.update?.message?.from.id + ""
+        const message = "Карыстальнік " + userId + " запытаў вынікі для " + sessionType.id
+        console.log(message)
+        if (userId !== ADMIN_ID) {
+            await notifyAdmin(message)
+        }
+
         const sessionData = prepareData(sessionType);
         // @ts-ignore
         sessionData.sessionNameBLR = sessionType.nameBLR
         // @ts-ignore
         sessionData.sessionNameUKR = sessionType.nameUKR
         
-        ctx.reply(createDriversList(sessionData))
+        ctx.reply(createDriversList(sessionData, sessionType))
         
-        await convert(sessionData, "BLR", sessionType)
-            .then(sendImageToUser(ctx))
+        if (userId === ADMIN_ID) {
+            await convert(sessionData, "BLR", sessionType)
+                .then(sendImageToUser(ctx))
+        }
         await convert(sessionData, "UKR", sessionType)
             .then(sendImageToUser(ctx))
     } catch (err) {
@@ -416,7 +432,7 @@ bot.command('fp3', async (ctx) => {
     await createAndSendScreenshots(ctx, sessionTypes.fp3)
 })
 
-bot.command('q1', async (ctx) => {
+bot.command('q1', async (ctx: Context<Update>) => {
     await createAndSendScreenshots(ctx, sessionTypes.q1)
 })
 

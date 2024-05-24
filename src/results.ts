@@ -5,7 +5,7 @@ import ejs from "ejs"
 import ws from "ws"
 import zlib from "zlib"
 import {Context, Telegraf} from 'telegraf'
-import {sessionTypes, SessionType} from "./utils/constants"
+import {sessionTypes, SessionType, Language} from "./utils/constants"
 import {DRIVER_NAMES} from "./utils/drivers"
 import {rounds, RoundInfo2024} from "./utils/rounds2024"
 import {timeConverter} from "./utils/time"
@@ -135,12 +135,12 @@ function prepareData(sessionType: SessionType) {
     }
 }
 
-async function convert(sessionData: any, language: string, sessionType: SessionType) {
+async function convert(sessionData: any, language: Language, sessionType: SessionType) {
     const browser = await puppeteer.launch({ headless: true })
     const page = await browser.newPage()
 
     let templateFolder = "templates"
-    if (language === "UKR") {
+    if (language === Language.UKR) {
         templateFolder += "-ukr"
     }
     const html = await ejs.renderFile(templateFolder + "/" + sessionType.template + ".ejs", sessionData)
@@ -366,11 +366,15 @@ function sendImageToUser(ctx) {
     return screenshot => ctx.replyWithDocument({source: screenshot[0], filename: screenshot[1]});
 }
 
-function createDriversList(sessionData: any, sessionType: SessionType) {
+function extractDriverName(language: Language, driver) {
+    return language === Language.BLR ? driver.nameBLR : driver.nameUKR;
+}
+
+function createDriversList(sessionData: any, sessionType: SessionType, language: Language) {
     return sessionData.drivers
         .slice(sessionType.takeFrom, sessionType.takeTo)
         .map((driver, i: number) => {
-            return (i+1) + ". " + driver.nameBLR
+            return (i+1) + ". " + extractDriverName(language, driver)
         })
         .reduce((a: string, b: string) => a + "\n" + b)
 }
@@ -388,23 +392,25 @@ async function createAndSendScreenshots(ctx: Context<any>, sessionType: SessionT
         const userId = extractUserId(ctx)
         const message = "Карыстальнік " + userId + " запытаў вынікі для " + sessionType.id
         console.log(message)
+        let language = Language.BLR
         if (userId !== ADMIN_ID) {
+            language = Language.UKR
             await notifyAdmin(message)
         }
 
         const sessionData = prepareData(sessionType);
+        ctx.reply(createDriversList(sessionData, sessionType, language))
+
         // @ts-ignore
         sessionData.sessionNameBLR = sessionType.nameBLR
         // @ts-ignore
         sessionData.sessionNameUKR = sessionType.nameUKR
-        
-        ctx.reply(createDriversList(sessionData, sessionType))
-        
+
         if (userId === ADMIN_ID) {
-            await convert(sessionData, "BLR", sessionType)
+            await convert(sessionData, Language.BLR, sessionType)
                 .then(sendImageToUser(ctx))
         }
-        await convert(sessionData, "UKR", sessionType)
+        await convert(sessionData, Language.UKR, sessionType)
             .then(sendImageToUser(ctx))
     } catch (err) {
         console.log(`Error: ${err.message}`)
@@ -456,17 +462,22 @@ bot.command('sq3', async (ctx) => {
     await createAndSendScreenshots(ctx, sessionTypes.sq3)
 })
 
+function createJsonBuffer(json: any) {
+    return Buffer.from(JSON.stringify(json), 'utf8')
+}
+
 bot.command('debugTad', async (ctx) => {
     const userId = extractUserId(ctx)
     if (userId === ADMIN_ID) {
-        bot.telegram.sendDocument(userId, { source: JSON.stringify(state['TimingAppData']) })
+        let json = state['TimingAppData']
+        bot.telegram.sendDocument(userId, { source: createJsonBuffer(json) })
     }
 })
 
 bot.command('debug', async (ctx) => {
     const userId = extractUserId(ctx)
     if (userId === ADMIN_ID) {
-        bot.telegram.sendDocument(userId, { source: JSON.stringify(state) })
+        bot.telegram.sendDocument(userId, { source: createJsonBuffer(state) })
     }
 })
 

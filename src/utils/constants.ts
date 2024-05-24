@@ -9,6 +9,11 @@ export const SPRINT_POINTS = {
     9: 0, 10: 0,
 }
 
+export enum Language {
+    BLR,
+    UKR,
+}
+
 export class SessionType {
     nameBLR: string
     nameUKR: string

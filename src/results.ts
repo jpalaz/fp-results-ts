@@ -470,14 +470,20 @@ bot.command('debugTad', async (ctx) => {
     const userId = extractUserId(ctx)
     if (userId === ADMIN_ID) {
         let json = state['TimingAppData']
-        bot.telegram.sendDocument(userId, { source: createJsonBuffer(json) })
+        bot.telegram.sendDocument(userId, {
+            source: createJsonBuffer(json),
+            filename: "debug-TimingAppData-" + Date.now() + ".json"
+        })
     }
 })
 
 bot.command('debug', async (ctx) => {
     const userId = extractUserId(ctx)
     if (userId === ADMIN_ID) {
-        bot.telegram.sendDocument(userId, { source: createJsonBuffer(state) })
+        bot.telegram.sendDocument(userId, {
+            source: createJsonBuffer(state),
+            filename: "debug-" + Date.now() + ".json",
+        })
     }
 })
 

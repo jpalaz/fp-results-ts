@@ -2,7 +2,6 @@ body {
     font-family: "Istok Web", sans-serif;
     font-weight: 400;
     font-style: normal;
-/*    font-family: Fredoka, Fallback, sans-serif;*/
 }
 
 #parent-container {
@@ -11,15 +10,6 @@ body {
 
 #header {
     display: flex;
-/*    font-family: Fredoka, Fallback, sans-serif;*/
-    
-/*    align-items: center;*/
-/*    justify-content: center;*/
-/*    padding: 15px;*/
-/*    !*    background-color: #333;*!*/
-/*    background-color: #292121;*/
-/*    color: #fff;*/
-
     background-color: #2c0000;
 /*    background-color: #0d0534;*/
 }
@@ -32,9 +22,6 @@ body {
     justify-content: left;
     padding: 15px;
     padding-left: 0;
-    /*    background-color: #333;*/
-/*    background-color: #292121;*/
-
     color: #fff;
 }
 
@@ -99,17 +86,9 @@ td {
 /*    font-weight: bold;*/
 }
 
-/*@font-face { font-family: Fredoka; src: url('FredokaRegular.ttf');}*/
-/*@font-face { font-family: Fredoka; font-weight: bold; src: url('FredokaSemiBold.ttf');} */
-
 .number-font {
     font-size: 1.8rem!important;
     padding-top: 15px !important;
-    
-/*    font-weight: bold;*/
-    
-/*    font-family: Fredoka, Fallback, sans-serif;*/
-/*    font-family: JetBrains Mono Medium;*/
 }
 
 #sciah {
@@ -156,7 +135,3 @@ td {
 .fastLap {
     color: #d400ff !important;
 }
-
-/*.fs-1 {*/
-/*     font-size: 2.8rem !important; */
-/*}*/

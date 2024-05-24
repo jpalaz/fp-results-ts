@@ -457,14 +457,16 @@ bot.command('sq3', async (ctx) => {
 })
 
 bot.command('debugTad', async (ctx) => {
-    if (extractUserId(ctx) === ADMIN_ID) {
-        ctx.reply("Цяперашняе значэнне TimingAppData:\n\n" + JSON.stringify(state['TimingAppData']))
+    const userId = extractUserId(ctx)
+    if (userId === ADMIN_ID) {
+        bot.telegram.sendDocument(userId, { source: JSON.stringify(state['TimingAppData']) })
     }
 })
 
 bot.command('debug', async (ctx) => {
-    if (extractUserId(ctx) === ADMIN_ID) {
-        ctx.reply("Цяперашняе значэнне аб'екту state:\n\n" + JSON.stringify(state))
+    const userId = extractUserId(ctx)
+    if (userId === ADMIN_ID) {
+        bot.telegram.sendDocument(userId, { source: JSON.stringify(state) })
     }
 })
 

@@ -59,9 +59,9 @@ export class SessionType {
 
     get takeTo() {
         if (this.id === "Q1" || this.id === "SQ1") {
-            return -1
+            return 20
         } else if (this.id === "Q2" || this.id === "SQ2") {
-            return 16
+            return 15
         } else if (this.id === "Q3" || this.id === "SQ3") {
             return 10
         } else {

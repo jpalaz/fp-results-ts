@@ -39,11 +39,12 @@ function translateLappedText(gap: string) {
 
 function mapSourceDataToDriver(sessionType: SessionType, it: any, i: number) {
     const knownDriver = DRIVER_NAMES[it[0]]
-    const driver = knownDriver != null ? knownDriver : DRIVER_NAMES["??"]
+    const driver = knownDriver != null ? knownDriver : (DRIVER_NAMES["??"] )
     const driverData = {
         nameBLR: driver.nameBLR,
         nameUKR: driver.nameUKR,
         teamId: driver.teamId,
+        replacement: knownDriver === null ? " &#128257;" : "",
 
         // practice
         bestLapTime: "",

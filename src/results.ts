@@ -400,9 +400,9 @@ async function createAndSendScreenshots(ctx: Context<any>, sessionType: SessionT
         let replyText: string
         if (language === Language.BLR) {
             replyText = "🏁 " + sessionType.nameBLR.slice(0, 1)
-                + sessionType.nameBLR.slice(1).toLowerCase() + "\n\n"
+                + sessionType.nameBLR.slice(1).toLowerCase() + ": вынікі!\n\n"
                 + driversOutLabel +
-                + driversText + "\n\n" + extractCurrentRound().hashtag
+                + `${driversText}` + "\n\n" + extractCurrentRound().hashtag
         } else {
             replyText = driversText
         }

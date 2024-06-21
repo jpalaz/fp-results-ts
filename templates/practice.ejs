@@ -44,7 +44,10 @@
               <td class="text-center number-font"><%= (i + 1) %></td>
               <td class="driver-name">
                 <img src="http://localhost:3000/teams-2024/<%= drivers[i].teamId %>.png" alt="T">
-                <span class="big-text"><%= drivers[i].nameBLR %><%= drivers[i].replacement %></span>
+                <span class="big-text"><%= drivers[i].nameBLR %></span>
+                  <% if(drivers[i].replacement){ %>
+                    <span> &#128257;</span>
+                  <% } %>
               </td>
               <td class="text-center number-font"><%= drivers[i].bestLapTime %></td>
               <td class="text-center number-font"><%= drivers[i].gap %></td>

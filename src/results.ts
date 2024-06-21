@@ -367,7 +367,7 @@ function extractDriverName(language: Language, driver) {
 }
 
 function createDriversList(sessionData: any, sessionType: SessionType, language: Language): string {
-    return sessionData.drivers
+    return "" + sessionData.drivers
         .map((driver, i: number) => {
             return (i+1) + ". " + extractDriverName(language, driver)
         })
@@ -395,13 +395,13 @@ async function createAndSendScreenshots(ctx: Context<any>, sessionType: SessionT
         }
 
         const sessionData = prepareData(sessionType);
-        const driversOutLabel = sessionType.isShootoutSession() ? "Не праходзяць далей:\n" : ""
         let replyText: string
         if (language === Language.BLR) {
+            const driversOutLabel = sessionType.isShootoutSession() ? "Не праходзяць далей:\n" : ""
             replyText = "🏁 " + sessionType.nameBLR.slice(0, 1)
                 + sessionType.nameBLR.slice(1).toLowerCase() + ": вынікі!\n\n"
                 + driversOutLabel +
-                + createDriversList(sessionData, sessionType, language)
+                + createDriversList(sessionData, sessionType, Language.BLR)
                 + "\n\n" + extractCurrentRound().hashtag
         } else {
             replyText = createDriversList(sessionData, sessionType, language)

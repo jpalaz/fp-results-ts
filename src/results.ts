@@ -369,7 +369,9 @@ function extractDriverName(language: Language, driver) {
 function createDriversList(sessionData: any, sessionType: SessionType, language: Language): string {
     return "" + sessionData.drivers
         .map((driver, i: number) => {
-            return (i+1) + ". " + extractDriverName(language, driver)
+            let line = (i+1) + ". " + extractDriverName(language, driver);
+            console.log(line)
+            return line
         })
         .slice(sessionType.takeFrom, sessionType.takeTo)
         .reduce((a: string, b: string) => a + "\n" + b)

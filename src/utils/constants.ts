@@ -45,6 +45,10 @@ export class SessionType {
         }
     }
 
+    isShootoutSession() {
+        return this.id === "Q1" || this.id === "SQ1" || this.id === "Q2" || this.id === "SQ2"
+    }
+
     get takeFrom() {
         if (this.id === "Q1" || this.id === "SQ1") {
             return 15

@@ -7,7 +7,7 @@ import zlib from "zlib"
 import {Context, Telegraf} from 'telegraf'
 import {sessionTypes, SessionType, Language} from "./utils/constants"
 import {DRIVER_NAMES} from "./utils/drivers"
-import {rounds, RoundInfo2024} from "./utils/rounds2024"
+import {extractCurrentRound} from "./utils/rounds2024"
 import {timeConverter} from "./utils/time"
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
@@ -20,12 +20,6 @@ const sortPosition = (a: any, b: any) => {
     const bPos = Number(bLine.Position);
     return aPos - bPos;
 };
-
-function extractCurrentRound() {
-    const now = new Date()
-    // @ts-ignore
-    return rounds.findLast((it: RoundInfo2024) => it.day <= now.getDate() && it.month <= (now.getMonth() + 1))
-}
 
 let state = {};
 
@@ -160,7 +154,7 @@ async function convert(sessionData: any, language: Language, sessionType: Sessio
     }
 
     await page.setViewport({ width: pageWidth, height: pageHeight })
-    const client = await page.target().createCDPSession();
+    const client = await page.createCDPSession();
     await client.send('Page.enable');
     await client.send('Page.setFontSizes', {
         fontSizes: {
@@ -280,6 +274,7 @@ const setupStream = async (wss) => {
     if (cookie && ConnectionToken) {
         console.log(`[${signalrUrl}] HTTP negotiation complete`);
 
+        // noinspection JSPotentiallyInvalidConstructorUsage
         socket = new ws(
             `wss://${signalrUrl}/connect?clientProtocol=1.5&transport=webSockets&connectionToken=${encodeURIComponent(
                 ConnectionToken
@@ -400,7 +395,15 @@ async function createAndSendScreenshots(ctx: Context<any>, sessionType: SessionT
         }
 
         const sessionData = prepareData(sessionType);
-        ctx.reply(createDriversList(sessionData, sessionType, language))
+        const driversText = createDriversList(sessionData, sessionType, language)
+        let replyText = driversText
+        const driversOutLabel = sessionType.isShootoutSession() ? "Вылецелі:\n" : ""
+        if (language === Language.BLR) {
+            replyText = "🏁 " + sessionType.nameBLR.toLowerCase() + "\n\n"
+                + driversOutLabel +
+                + driversText + "\n\n" + extractCurrentRound().hashtag
+        }
+        await ctx.reply(replyText)
 
         // @ts-ignore
         sessionData.sessionNameBLR = sessionType.nameBLR

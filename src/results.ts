@@ -403,7 +403,7 @@ async function createAndSendScreenshots(ctx: Context<any>, sessionType: SessionT
             replyText = "🏁 " + sessionType.nameBLR.slice(0, 1)
                 + sessionType.nameBLR.slice(1).toLowerCase() + ": вынікі!\n\n"
                 + driversOutLabel +
-                + createDriversList(sessionData, sessionType, Language.BLR)
+                + String(createDriversList(sessionData, sessionType, Language.BLR))
                 + "\n\n" + extractCurrentRound().hashtag
         } else {
             replyText = createDriversList(sessionData, sessionType, language)

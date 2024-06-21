@@ -44,7 +44,7 @@ function mapSourceDataToDriver(sessionType: SessionType, it: any, i: number) {
         nameBLR: driver.nameBLR,
         nameUKR: driver.nameUKR,
         teamId: driver.teamId,
-        replacement: knownDriver == null,
+        // replacement: knownDriver == null,
 
         // practice
         bestLapTime: "",

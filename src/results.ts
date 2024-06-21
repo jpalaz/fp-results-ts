@@ -396,12 +396,15 @@ async function createAndSendScreenshots(ctx: Context<any>, sessionType: SessionT
 
         const sessionData = prepareData(sessionType);
         const driversText = createDriversList(sessionData, sessionType, language)
-        let replyText = driversText
-        const driversOutLabel = sessionType.isShootoutSession() ? "Вылецелі:\n" : ""
+        const driversOutLabel = sessionType.isShootoutSession() ? "Не праходзяць далей:\n" : ""
+        let replyText: string
         if (language === Language.BLR) {
-            replyText = "🏁 " + sessionType.nameBLR.toLowerCase() + "\n\n"
+            replyText = "🏁 " + sessionType.nameBLR.slice(0, 1)
+                + sessionType.nameBLR.slice(1).toLowerCase() + "\n\n"
                 + driversOutLabel +
                 + driversText + "\n\n" + extractCurrentRound().hashtag
+        } else {
+            replyText = driversText
         }
         await ctx.reply(replyText)
 

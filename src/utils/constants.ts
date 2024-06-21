@@ -75,15 +75,15 @@ export class SessionType {
 }
 
 export const sessionTypes = {
-    q1: new SessionType('КВАЛІФІКАЦЫЯ - 1', 'КВАЛІФІКАЦІЯ - 1', "qualification", "Q1"),
-    q2: new SessionType('КВАЛІФІКАЦЫЯ - 2', 'КВАЛІФІКАЦІЯ - 2', "qualification", "Q2"),
-    q3: new SessionType('КВАЛІФІКАЦЫЯ', 'КВАЛІФІКАЦІЯ', "qualification", "Q3"),
+    q1: new SessionType('КВАЛІФІКАЦЫЯ - 1 СЕГМЕНТ', 'КВАЛІФІКАЦІЯ - 1', "qualification", "Q1"),
+    q2: new SessionType('КВАЛІФІКАЦЫЯ - 2 СЕГМЕНТ', 'КВАЛІФІКАЦІЯ - 2', "qualification", "Q2"),
+    q3: new SessionType('КВАЛІФІКАЦЫЯ - ФІНАЛ', 'КВАЛІФІКАЦІЯ', "qualification", "Q3"),
     sq1: new SessionType('СПРЫНТ КВАЛІФІКАЦЫЯ - 1', 'СПРИНТ КВАЛІФІКАЦІЯ - 1', "qualification", "SQ1"),
     sq2: new SessionType('СПРЫНТ КВАЛІФІКАЦЫЯ - 2', 'СПРИНТ КВАЛІФІКАЦІЯ - 2', "qualification", "SQ2"),
     sq3: new SessionType('СПРЫНТ КВАЛІФІКАЦЫЯ', 'СПРИНТ КВАЛІФІКАЦІЯ', "qualification", "SQ3"),
     race: new SessionType('ГОНКА', 'ГОНКА', "race", "race"),
     sprint: new SessionType('СПРЫНТ', 'СПРИНТ', "race", "sprint"),
-    fp1: new SessionType('ВОЛЬНАЯ ПРАКТЫКА 1', 'ПРАКТИКА 1', "practice", "FP1"),
-    fp2: new SessionType('ВОЛЬНАЯ ПРАКТЫКА 2', 'ПРАКТИКА 2', "practice", "FP2"),
-    fp3: new SessionType('ВОЛЬНАЯ ПРАКТЫКА 3', 'ПРАКТИКА 3', "practice", "FP3"),
+    fp1: new SessionType('ПРАКТЫКА 1', 'ПРАКТИКА 1', "practice", "FP1"),
+    fp2: new SessionType('ПРАКТЫКА 2', 'ПРАКТИКА 2', "practice", "FP2"),
+    fp3: new SessionType('ПРАКТЫКА 3', 'ПРАКТИКА 3', "practice", "FP3"),
 };

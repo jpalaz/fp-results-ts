@@ -6,7 +6,7 @@ import ws from "ws"
 import zlib from "zlib"
 import {Context, Telegraf} from 'telegraf'
 import {sessionTypes, SessionType, Language} from "./utils/constants"
-import {DRIVER_NAMES} from "./utils/drivers"
+import {convertReplacementToDriver, Driver, DRIVER_NAMES} from "./utils/drivers"
 import {extractCurrentRound} from "./utils/rounds2024"
 import {timeConverter} from "./utils/time"
 
@@ -21,7 +21,8 @@ const sortPosition = (a: any, b: any) => {
     return aPos - bPos;
 };
 
-let state = {};
+let state = {}
+let modifications = {}
 
 function translateLappedText(gap: string) {
     const indexOfL = gap.indexOf("L")
@@ -31,9 +32,17 @@ function translateLappedText(gap: string) {
     return gap
 }
 
+function findReplacementName(driverNumber: any): Driver {
+    // @ts-ignore
+    const rowDriver = state.DriverList[driverNumber]
+    const teamName = rowDriver.TeamName
+    const lastName = rowDriver.LastName
+    return convertReplacementToDriver(lastName, teamName)
+}
+
 function mapSourceDataToDriver(sessionType: SessionType, it: any, i: number) {
     const knownDriver = DRIVER_NAMES[it[0]]
-    const driver = knownDriver != null ? knownDriver : (DRIVER_NAMES["??"] )
+    const driver = knownDriver != null ? knownDriver : findReplacementName(it[0])
     const driverData = {
         nameBLR: driver.nameBLR,
         nameUKR: driver.nameUKR,
@@ -250,8 +259,6 @@ const updateState = (data) => {
 
             state = deepObjectMerge(state, parsed.R);
         }
-//        console.log("Updated F1 state")
-        //        console.log(state)
     } catch (e) {
         console.error(`could not update data: ${e}`);
     }
@@ -310,7 +317,7 @@ const setupStream = async (wss) => {
                             "TimingAppData",
                             //                            "WeatherData",
                             "TrackStatus",
-                            //                            "DriverList",
+                            "DriverList",
                             //                            "RaceControlMessages",
                             "SessionInfo",
                             "SessionData",
@@ -418,9 +425,10 @@ async function createAndSendScreenshots(ctx: Context<any>, sessionType: SessionT
         if (userId === ADMIN_ID) {
             await convert(sessionData, Language.BLR, sessionType)
                 .then(sendImageToUser(ctx))
+        } else {
+            await convert(sessionData, Language.UKR, sessionType)
+                .then(sendImageToUser(ctx))
         }
-        await convert(sessionData, Language.UKR, sessionType)
-            .then(sendImageToUser(ctx))
     } catch (err) {
         console.log(`Error: ${err.message}`)
         ctx.reply(`Адбылася памылка:\n\n${err.message}`)
